@@ -8,6 +8,7 @@ import json
 import logging
 import time
 import threading
+import wowapi
 from datetime import datetime
 from urllib.parse import quote
 from flask import Flask, app, render_template, request, redirect
@@ -149,7 +150,7 @@ async def data_sim():
             addon_url = '%s-%s' % (sims[user]['char'], sims[user]['timestr'])
             await set_status()
             msg = 'You can add your addon data here: %s:%s/%s' % (website, server_opts['listen_port'], addon_url)
-            await bot.send_message(sims[user]['message'].author, msg)
+            await sims[user]['message'].author.send(msg)
             wait_data = True
             while wait_data:
                 timer += 1
@@ -157,7 +158,7 @@ async def data_sim():
                 if timer > simc_opts['data_timeout']:
                     wait_data = False
             if not os.path.isfile(sims[user]['addon']):
-                await bot.send_message(sims[user]['message'].author, 'No data given. Resetting session.')
+                await sims[user]['message'].author.send('No data given. Resetting session.')
                 del sims[user]
                 waiting = False
                 await set_status()
@@ -168,7 +169,7 @@ async def data_sim():
                 for crole in healing_roles:
                     crole = 'spec=' + crole
                     if crole in addon_data:
-                        await bot.send_message(sims[user]['message'].channel,
+                        await sims[user]['message'].channel.send(
                                                'SimulationCraft does not support healing.')
                         del sims[user]
                         waiting = False
@@ -179,14 +180,14 @@ async def data_sim():
         if sims[user]['data'] != 'addon':
             api = await check_spec(sims[user]['region'], sims[user]['realm'].replace('_', '-'), sims[user]['char'])
             if api == 'HEALING':
-                await bot.send_message(sims[user]['message'].channel, 'SimulationCraft does not support healing.')
+                await sims[user]['message'].channel.send('SimulationCraft does not support healing.')
                 waiting = False
                 del sims[user]
                 logger.info('Character is a healer. Aborting sim.')
                 failed = True
             elif not api == 'DPS' and not api == 'TANK':
                 msg = 'Something went wrong: %s' % api
-                await bot.send_message(sims[user]['message'].channel, msg)
+                await sims[user]['message'].channel.send(msg)
                 waiting = False
                 del sims[user]
                 logger.warning('Simulation could not start: %s' % api)
@@ -202,7 +203,7 @@ async def data_sim():
         if busy:
             position = len(sims) - 1
             if position > 0:
-                await bot.send_message(sims[user]['message'].channel,
+                await sims[user]['message'].channel.send(
                                        'Simulation added to queue. Queue position: %s' % position)
                 await set_status()
                 logger.info('A new simulation has been added to queue')
@@ -272,7 +273,7 @@ async def sim():
             logger.info('PTR: ' + ptr)
             logger.info('----------------------------------')
         except FileNotFoundError as e:
-            await bot.send_message(sims[sim_user]['message'].channel, 'ERR: Simulation could not start.')
+            await sims[sim_user]['message'].channel.send('ERR: Simulation could not start.')
             logger.critical('Bot could not start simulationcraft program. (ERR: %s)' % e)
             del sims[sim_user]
             await set_status()
@@ -284,8 +285,8 @@ async def sim():
                   sims[sim_user]['movements'],
                   sims[sim_user]['length'], sims[sim_user]['aoe'].capitalize(), sims[sim_user]['iterations'],
                   sims[sim_user]['scaling'].capitalize(), sims[sim_user]['data'].capitalize(), ptr)
-        await bot.send_message(sims[sim_user]['message'].channel, '\nSimulationCraft:\n' + msg)
-        load = await bot.send_message(sims[sim_user]['message'].channel, 'Simulating: Starting...')
+        await sims[sim_user]['message'].channel.send('\nSimulationCraft:\n' + msg)
+        load = await sims[sim_user]['message'].channel.send('Simulating: Starting...')
         await asyncio.sleep(1)
         while loop:
             running += 2
@@ -330,8 +331,8 @@ async def sim():
             if len(process_check) > 1:
                 if 'report took' in process_check[-2]:
                     loop = False
-                    await bot.edit(load, 'Simulation done.')
-                    await bot.send_messages(sims[sim_user]['message'].channel,
+                    await discord.message.Message.edit('Simulation done.')
+                    await sims[sim_user]['message'].channel.send(
                                            link + ' {0.author.mention}'.format(message))
                     process.terminate()
                     busy = False
@@ -404,7 +405,7 @@ async def on_message(message):
                         return
                     if args[1].startswith(('q', 'queue')):
                         if busy:
-                            await message.channel.Send(message.channel,
+                            await message.channel.send(
                                                    'Queue: %s/%s' % (len(sims), server_opts['queue_limit']))
                         else:
                             await message.channel.send('Queue is empty')
@@ -427,7 +428,7 @@ async def on_message(message):
                                        'iterations': simc_opts['default_iterations'],
                                        'scale': 0,
                                        'scaling': 'no',
-                                       'data': 'armory',
+                                       'data': 'addon',
                                        'char': '',
                                        'aoe': 'no',
                                        'enemy': '',
@@ -438,7 +439,7 @@ async def on_message(message):
                                        'l_fixed': 0,
                                        'ptr': 0,
                                        'timestr': datetime.utcnow().strftime('%Y%m%d.%H%m%S%f')[:-3],
-                                       'message': ''
+                                       'message': '',
                                        }
                                 }
                     sims.update(user_sim)
@@ -533,7 +534,7 @@ async def on_message(message):
                             if key == 'enemy':
                                 sims[user]['enemy'] = a_temp
 
-                    os.makedirs(os.path.dirname(os.path.join(htmldir + 'sims', sims[user]['char'], 'test.file')),
+                    os.makedirs(os.path.dirname(os.path.join(htmldir,'sims', sims[user]['char'], 'test.file')),
                                 exist_ok=True)
                     bot.loop.create_task(data_sim())
             except IndexError as e:

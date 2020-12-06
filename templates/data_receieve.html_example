@@ -1,4 +1,0 @@
-<form action="submit" id="textform" method="post">
-    <textarea rows="40" cols="200" name="text" style="width:500px;" Placeholder="Paste data from addon here..."></textarea>
-    </br>
-    <input type="submit" value="Submit"></form>
