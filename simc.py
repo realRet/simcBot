@@ -11,7 +11,7 @@ import threading
 import wowapi
 from datetime import datetime
 from urllib.parse import quote
-from flask import Flask, app, render_template, request, redirect
+from flask import Flask, app, render_template, request, redirect, send_file
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 with open('user_data.json') as data_file:
@@ -32,7 +32,7 @@ def webservice():
     app.run(host=server_opts['listen_ip'], port=server_opts['listen_port'], threaded=True)
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="C:\\var\\www\\sims")
 thread = threading.Thread(target=webservice, args=())
 thread.daemon = True
 thread.start()
@@ -48,6 +48,7 @@ if 'process_priority' in simc_opts:
 htmldir = simc_opts['htmldir']
 website = simc_opts['website']
 os.makedirs(os.path.dirname(os.path.join(htmldir + 'debug', 'test.file')), exist_ok=True)
+simDir = os.path.dirname(os.path.join(htmldir,'/sims'))
 waiting = False
 wait_data = False
 busy = False
@@ -110,10 +111,6 @@ async def check_spec(region, realm, char):
                 logger.critical('Error in aiohttp request: %s', url)
                 return 'Failed to look up class spec from armory.'
 
-@app.route('/')
-def default():
-    return redirect('https://github.com/stokbaek/simc-discord', code=302)
-
 
 @app.route('/<addon_url>')
 def my_form(addon_url):
@@ -121,7 +118,6 @@ def my_form(addon_url):
         return render_template("data_receieve.html")
     else:
         return render_template("403.html")
-
 
 @app.route('/submit', methods=['POST'])
 def submit_textarea():
@@ -134,6 +130,9 @@ def submit_textarea():
     wait_data = False
     return 'Data received\nThis page can now be closed'
 
+@app.route('/sim')
+def serverSim(path):
+    return send_file(path)
 
 async def data_sim():
     global api_key
@@ -145,7 +144,8 @@ async def data_sim():
         waiting = True
         timer = 0
         if sims[user]['data'] == 'addon':
-            sims[user]['addon'] = '%ssims/%s/%s-%s.simc' % (
+
+            sims[user]['addon'] = '%s/sims/%s/%s-%s.simc' % (
                 htmldir, sims[user]['char'], sims[user]['char'], sims[user]['timestr'])
             addon_url = '%s-%s' % (sims[user]['char'], sims[user]['timestr'])
             await set_status()
