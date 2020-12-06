@@ -2,22 +2,16 @@
 ***Options:***
 -c      -character         **in-game name**
 -r      -realm                 **realm name** *(Default is Magtheridon)*
--s      -scale                  **yes/no** *(Default is no)*
--d     -data                   **armory/addon** *(Default is armory)*
 -f      -fightstyle          **Choose between different fightstyles**
 -l      -length                **Choose fight length in seconds** *(Default is 400)*
 -a     -aoe                     **yes/no** *(Default is no)*
-         -ptr                      **Enables PTR build on sim**
 -v     -version              **Gives the version of simulationcraft being used**
 
 
-● Simulate using armory with stat scaling:
-`!simc -character NAME -scale yes`
+-> Simulate you character using:
+`!simc -character NAME`
 
-● Simulate using addon without stat scaling:
-`!simc -character NAME -d addon`
-
-The bot will whisper with a unique link were addon data, APL trinket compare can be added.
+The bot will whisper with a unique link where you need to paste your addon data.
 Addon can be found here: <https://mods.curse.com/addons/wow/simulationcraft>
 
 __example__:

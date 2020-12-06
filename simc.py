@@ -48,7 +48,7 @@ if 'process_priority' in simc_opts:
 htmldir = simc_opts['htmldir']
 website = simc_opts['website']
 os.makedirs(os.path.dirname(os.path.join(htmldir + 'debug', 'test.file')), exist_ok=True)
-simDir = os.path.dirname(os.path.join(htmldir,'/sims'))
+simDir = os.path.dirname(os.path.join(htmldir, '/sims'))
 waiting = False
 wait_data = False
 busy = False
@@ -71,18 +71,21 @@ def check_simc():
         version = v.readline().rstrip('\n')
     return version
 
+
 async def set_status():
     if len(sims) == server_opts['queue_limit']:
         try:
             await bot.change_presence(status=discord.Status.dnd,
-                                      game=discord.Game(name='Sim: %s/%s' % (len(sims), server_opts['queue_limit'])))
+                                      activity=discord.Game(
+                                          name='Sim: %s/%s' % (len(sims), server_opts['queue_limit'])))
         except:
             logger.warning('Failed to set presence for full queue.')
             pass
     else:
         try:
             await bot.change_presence(status=discord.Status.online,
-                                      game=discord.Game(name='Sim: %s/%s' % (len(sims), server_opts['queue_limit'])))
+                                      activity=discord.Game(
+                                          name='Sim: %s/%s' % (len(sims), server_opts['queue_limit'])))
         except:
             logger.warning('Failed to set presence for queue.')
             pass
@@ -119,6 +122,7 @@ def my_form(addon_url):
     else:
         return render_template("403.html")
 
+
 @app.route('/submit', methods=['POST'])
 def submit_textarea():
     global addon_data
@@ -130,9 +134,6 @@ def submit_textarea():
     wait_data = False
     return 'Data received\nThis page can now be closed'
 
-@app.route('/sim')
-def serverSim(path):
-    return send_file(path)
 
 async def data_sim():
     global api_key
@@ -149,7 +150,7 @@ async def data_sim():
                 htmldir, sims[user]['char'], sims[user]['char'], sims[user]['timestr'])
             addon_url = '%s-%s' % (sims[user]['char'], sims[user]['timestr'])
             await set_status()
-            msg = 'You can add your addon data here: %s:%s/%s' % (website, server_opts['listen_port'], addon_url)
+            msg = 'You can add your addon data here: %s/%s' % (website, addon_url)
             await sims[user]['message'].author.send(msg)
             wait_data = True
             while wait_data:
@@ -211,6 +212,7 @@ async def data_sim():
             bot.loop.create_task(sim())
         else:
             return
+
 
 async def sim():
     global sims
@@ -331,7 +333,7 @@ async def sim():
             if len(process_check) > 1:
                 if 'report took' in process_check[-2]:
                     loop = False
-                    await discord.message.Message.edit('Simulation done.')
+                    await load.edit(content='Simulation done.')
                     await sims[sim_user]['message'].channel.send(
                                            link + ' {0.author.mention}'.format(message))
                     process.terminate()
@@ -362,8 +364,7 @@ async def sim():
                         else:
                             timer = ''
                         try:
-                            load = await bot.edit_message(load, status + ' ' + progressbar + ' ' +
-                                                          str(percentage) + '%' + timer)
+                            await load.edit(content=status + ' ' + progressbar + ' ' + str(percentage) + '%' + timer)
                         except:
                             logger.warning('Failed updating progress')
                             pass
@@ -385,14 +386,13 @@ async def on_message(message):
     args = message.content.lower()
     if message.author == bot.user:
         return
-    #if discord.channel.ChannelType.private:
-    #    logger.info('%s sent follow data to bot: %s' % (message.author, message.content))
+
     if args.startswith('!simc'):
         args = args.split(' -')
         if args:
             try:
                 if args[1].startswith(('h', 'help')):
-                    with open('help.file', errors='replace') as h:
+                    with open('help.file.bak', errors='replace') as h:
                         msg = h.read()
                     await message.author.send(msg)
                     return
@@ -458,16 +458,16 @@ async def on_message(message):
                                 for key in sims[user]:
                                     if key == 'char':
                                         sims[user]['char'] = temp[1]
-                            elif args[i].startswith(('s ', 'scaling ')):
-                                temp = args[i].split()
-                                for key in sims[user]:
-                                    if key == 'scaling':
-                                        sims[user]['scaling'] = temp[1]
-                            elif args[i].startswith(('d ', 'data ')):
-                                temp = args[i].split()
-                                for key in sims[user]:
-                                    if key == 'data':
-                                        sims[user]['data'] = temp[1]
+                            # elif args[i].startswith(('s ', 'scaling ')):
+                            #     temp = args[i].split()
+                            #     for key in sims[user]:
+                            #         if key == 'scaling':
+                            #             sims[user]['scaling'] = temp[1]
+                            # elif args[i].startswith(('d ', 'data ')):
+                            #     temp = args[i].split()
+                            #     for key in sims[user]:
+                            #         if key == 'data':
+                            #             sims[user]['data'] = temp[1]
                             elif args[i].startswith(('i ', 'iterations ')):
                                 if simc_opts['allow_iteration_parameter']:
                                     temp = args[i].split()
@@ -489,7 +489,7 @@ async def on_message(message):
                                         fstyle = True
                                 if fstyle is not True:
                                     await message.channel.send('Unknown fightstyle.\nSupported Styles: ' +
-                                                           ', '.join(simc_opts['fightstyles']))
+                                                               ', '.join(simc_opts['fightstyles']))
                                     logger.info(
                                         '%s tried starting sim with unknown fightstyle: %s' % (message.author, temp[1]))
                                     return
@@ -508,10 +508,10 @@ async def on_message(message):
                                         for key in sims[user]:
                                             if key == 'l_fixed':
                                                 sims[user]['l_fixed'] = 1
-                            elif args[i] == 'ptr':
-                                for key in sims[user]:
-                                    if key == 'ptr':
-                                        sims[user]['ptr'] = 1
+                            # elif args[i] == 'ptr':
+                            #     for key in sims[user]:
+                            #         if key == 'ptr':
+                            #             sims[user]['ptr'] = 1
                             else:
                                 await message.channel.send('Unknown command. Use !simc -h/help for commands')
                                 del sims[user]
@@ -534,7 +534,7 @@ async def on_message(message):
                             if key == 'enemy':
                                 sims[user]['enemy'] = a_temp
 
-                    os.makedirs(os.path.dirname(os.path.join(htmldir,'sims', sims[user]['char'], 'test.file')),
+                    os.makedirs(os.path.dirname(os.path.join(htmldir, 'sims', sims[user]['char'], 'test.file')),
                                 exist_ok=True)
                     bot.loop.create_task(data_sim())
             except IndexError as e:
