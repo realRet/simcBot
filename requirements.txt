@@ -1,0 +1,4 @@
+discord>=1.0.1
+aiohttp>=3.7.3
+wowapi>=0.4.0
+flask>=1.1.2
