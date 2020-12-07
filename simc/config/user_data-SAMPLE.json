@@ -1,0 +1,33 @@
+{
+  "web_server_opts": {
+    "listen_ip": "",
+    "listen_port": "",
+    "static_files_dir": null
+  },
+  "simc_bot_opts": {
+    "server_id": "",
+    "channel_id": "",
+    "token": "",
+    "queue_limit": 10,
+    "log_level": "DEBUG",
+    "logs_dir": ""
+  },
+  "simcraft_opts": {
+    "website_url": "",
+    "api_key": "",
+    "sims_dir": "",
+    "default_realm": "draenor",
+    "simcraft_dir": "",
+    "simcraft_exe_name": "simc.exe",
+    "region": "eu",
+    "allow_iteration": false,
+    "default_iterations": "25000",
+    "fight_styles": ["Patchwerk", "LightMovement" ,"HeavyMovement", "HecticAddCleave", "HelterSkelter"],
+    "aoe_targets": 4,
+    "threads": 8,
+    "process_priority": "low",
+    "length": 400,
+    "data_timeout": 60,
+    "timeout": 1
+  }
+}
