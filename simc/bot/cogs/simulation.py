@@ -295,7 +295,7 @@ class Simulation(commands.Cog):
         if ctx.author == self.bot.user:
             return
 
-        arg_re = re.compile(r"-([a-z]+\s+(?:\S+)?)(?:(?!\-)|$)")
+        arg_re = re.compile(r"-([a-z]+(?:\s+|$)(?:\s+|[^-]+)?)(?:(?!-)?|$)")
         args = re.findall(arg_re, args.lower())
 
         if args:
@@ -401,11 +401,11 @@ class Simulation(commands.Cog):
                                 logger.info(
                                     '%s tried starting sim with unknown fightstyle: %s' % (ctx.author, temp[1]))
                                 return
-                        elif args[i].startswith(('a ', 'aoe ')):
-                            temp = args[i].split()
-                            for key in self.sims[self.user]:
-                                if key == 'aoe':
-                                    self.sims[self.user]['aoe'] = temp[1]
+                        # elif args[i].startswith(('a ', 'aoe ')):
+                        #     temp = args[i].split()
+                        #     for key in self.sims[self.user]:
+                        #         if key == 'aoe':
+                        #             self.sims[self.user]['aoe'] = temp[1]
                         elif args[i].startswith(('l ', 'length ')):
                             temp = args[i].split()
                             for key in self.sims[self.user]:
