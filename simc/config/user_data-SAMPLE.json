@@ -16,6 +16,7 @@
     "website_url": "",
     "api_key": "",
     "sims_dir": "",
+    "sims_cache_dir": "",
     "default_realm": "draenor",
     "simcraft_dir": "",
     "simcraft_exe_name": "simc.exe",
